@@ -1,0 +1,4 @@
+node_modules
+localHostNames.json
+.DS_Store
+dist
