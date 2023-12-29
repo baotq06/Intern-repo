@@ -19,7 +19,11 @@ const apis: ExpressHandler[] = [
           _id: user._id.toString(),
           name: user.name,
           age: user.age,
-          address: user.address
+          address: user.address,
+          team: user.team,
+          role: user.role,
+          username: user.username,
+          password: user.password,
         }));
 
         return nextpayResponse(res, 'Users retrieved successfully', 'USERS_RETRIEVED', formattedUsers);
@@ -61,6 +65,7 @@ const apis: ExpressHandler[] = [
         const { id } = req.params;
         const updatedUser = req.body;
 
+        // ktra xem id đó có tồn tại không
         if (!mongoose.Types.ObjectId.isValid(id)) {
           return nextpayError(res, 'Invalid user ID', langs.BAD_REQUEST);
         }
