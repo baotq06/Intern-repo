@@ -11,6 +11,7 @@ const SECRET_KEY = 'your-secret-key';
 const logger = Logger.create('user_mongodb.ts');
 
 const apis: ExpressHandler[] = [
+    // login : đăng nhập tk mk => sinh ra token uuid để bảo mật
     {
         path: '/login-uuid',
         method: 'POST',
@@ -54,6 +55,8 @@ const apis: ExpressHandler[] = [
                     username: user.name,
                     age: user.age,
                     address: user.address,
+                    team: user.team,
+                    role: user.role,
                     tempToken,
                 };
 
@@ -65,6 +68,7 @@ const apis: ExpressHandler[] = [
             }
         },
     },
+    // đăng nhập tk mk => sinh ra token jwt để bảo mật
     {
         path: '/login-jwt',
         method: 'POST',
@@ -81,6 +85,9 @@ const apis: ExpressHandler[] = [
                     return nextpayError(res, 'Invalid username or password', langs.UNAUTHORIZED);
                 }
 
+                const iat = Math.floor(Date.now() / 1000);
+                const exp = iat + 3600;
+
                 const jwtToken = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '1h' });
                 console.log('Generated JWT token:', jwtToken);
 
@@ -92,6 +99,10 @@ const apis: ExpressHandler[] = [
                     username: user.name,
                     age: user.age,
                     address: user.address,
+                    team: user.team,
+                    role: user.role,
+                    iat,
+                    exp,
                     jwtToken,
                 };
 

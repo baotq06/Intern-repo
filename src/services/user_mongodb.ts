@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 const logger = Logger.create('user_mongodb.ts');
 const apis: ExpressHandler[] = [
   {
+    // In ra thông tin của tất cả các users
     path: '/users',
     method: 'GET',
     action: async (req, res) => {
@@ -15,6 +16,7 @@ const apis: ExpressHandler[] = [
 
         const users = await TestModel.find().lean();
         logger.info(users);
+
         const formattedUsers = users.map(user => ({
           _id: user._id.toString(),
           name: user.name,
@@ -79,6 +81,8 @@ const apis: ExpressHandler[] = [
         existingUser.name = updatedUser.name;
         existingUser.age = updatedUser.age;
         existingUser.address = updatedUser.address;
+        existingUser.team = updatedUser.team;
+        existingUser.role = updatedUser.role;
 
         await existingUser.save();
 

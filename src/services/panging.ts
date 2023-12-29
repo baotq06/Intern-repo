@@ -6,34 +6,66 @@ import TestModel from '../models/test.model';
 const logger = Logger.create('pagination_api.ts');
 
 const paginateAPI: ExpressHandler[] = [{
+    // Phân trang
+    // Chuyển giữa các trang 
+    // Chia record cho mỗi trang
+    // Tổng số record
     path: '/api-panging',
     method: 'POST',
     action: async (req, res) => {
         try {
-            const { page, pageSize } = req.body;
-
+            const { page, pageSize = 1, filters } = req.body;
             const offset = (page - 1) * pageSize;
 
-            // Lấy danh sách người dùng cho trang hiện tại
-            const users = await TestModel.find()
-                .skip(offset)
-                .limit(parseInt(pageSize))
-                .lean();
+            // filters: dùng để tìm theo username or age or address ........
+            const query: Record<string, any> = {};
+            if (filters) {
+                if (filters.username) {
+                    query.username = { $regex: new RegExp(filters.username, 'i') };
+                }
+                if (filters.name) {
+                    query.name = { $regex: new RegExp(filters.name, 'i') };
+                }
+                if (filters.age) {
+                    query.age = filters.age;
+                }
+                if (filters.address) {
+                    query.address = { $regex: new RegExp(filters.address, 'i') };
+                }
+            }
 
-            // Lấy tổng số người dùng trong cơ sở dữ liệu
-            const totalUsers = await TestModel.countDocuments();
+            const filteredDocuments = await TestModel.find(query).skip(offset).limit(parseInt(pageSize)).lean();
 
-            // Tính toán tổng số trang
-            const totalPages = Math.ceil(totalUsers / pageSize);
+            const mappedFilters = filteredDocuments.map((filter) => ({
+                _id: filter._id.toString(),
+                name: filter.name,
+                age: filter.age,
+                address: filter.address,
+                team: filter.team,
+                role: filter.role,
+                username: filter.username,
+                password: filter.password,
+            }));
 
-            // Tạo đối tượng chứa thông tin phân trang
+            // const users = await TestModel.find()
+            //     .skip(offset)
+            //     .limit(parseInt(pageSize))
+            //     .lean();
+
+            // count record
+            const totalUser = await TestModel.countDocuments();
+
+            // count page
+            const totalPage = Math.ceil(totalUser / pageSize);
+
             const paginationInfo = {
                 currentPage: parseInt(page),
-                pageSize: parseInt(pageSize),
-                totalUsers,
-                totalPages,
-                users,
-            };
+                pageSize: parseInt(page),
+                totalUser,
+                totalPage,
+                // users,
+                filters: mappedFilters
+            }
 
             return nextpayResponse(res, 'Pagination successful', 'PAGINATION_SUCCESS', paginationInfo);
         } catch (error: any) {

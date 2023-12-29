@@ -24,6 +24,9 @@ const apis: ExpressHandler[] = [
             }
         }
     },
+    // Truyền token vào
+    // B1: Nếu là admin thì update cho admin or có thể update được cho tất cả mọi người
+    // B2: Nếu là user thì update cho chính họ và không có quyền update cho ai nữa
     {
         path: '/update-user-info',
         method: 'PUT',
@@ -50,6 +53,7 @@ const apis: ExpressHandler[] = [
                     userToUpdate.name = updatedData.name || userToUpdate.name;
                     userToUpdate.age = updatedData.age || userToUpdate.age;
                     userToUpdate.address = updatedData.address || userToUpdate.address;
+                    userToUpdate.username = updatedData.username || userToUpdate.username;
 
                     await userToUpdate.save();
 
@@ -79,6 +83,9 @@ const apis: ExpressHandler[] = [
             }
         }
     },
+    // Truyền token mà khi login sinh ra
+    // B1: Nếu là admin thì in ra thông tin của tất cả mọi người (all)
+    // B2: Nếu là user thì chỉ in ra thông tin của những người liên quan với user đó, vd: cùng team.......
     {
         path: '/list-users',
         method: 'GET',
