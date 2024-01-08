@@ -7,6 +7,10 @@ import demo2Proxy from './proxy/demo2';
 import login_uuid from './login';
 import demoApis from './authenticateTokens';
 import paginateAPI from './panging';
+import exchange_point from './exchange_point';
+import market from './market';
+import topup from './topup';
+import transaction from './transactions';
 
 const apis: (ExpressHandler | ProxyExpressHandler)[] = [
   ...healthCheckApis,
@@ -17,6 +21,10 @@ const apis: (ExpressHandler | ProxyExpressHandler)[] = [
   ...demo2Proxy,
   ...demoApis,
   ...paginateAPI,
+  ...exchange_point,
+  ...market,
+  ...topup,
+  ...transaction
 ];
 
 export default apis;

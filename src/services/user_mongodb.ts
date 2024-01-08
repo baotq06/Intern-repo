@@ -26,6 +26,9 @@ const apis: ExpressHandler[] = [
           role: user.role,
           username: user.username,
           password: user.password,
+          point: user.point,
+          type: user.type,
+          inventory: user.inventory,
         }));
 
         return nextpayResponse(res, 'Users retrieved successfully', 'USERS_RETRIEVED', formattedUsers);
@@ -43,10 +46,9 @@ const apis: ExpressHandler[] = [
     action: async (req, res) => {
       try {
         const newUser = req.body;
-
         const { name, age, address } = newUser;
         const user = new TestModel({ name, age, address });
-        // user._id = new mongoose.Types.ObjectId();
+
         await user.save();
 
         return nextpayResponse(res, 'User added successfully', 'USER_ADDED', user);
@@ -83,6 +85,8 @@ const apis: ExpressHandler[] = [
         existingUser.address = updatedUser.address;
         existingUser.team = updatedUser.team;
         existingUser.role = updatedUser.role;
+        existingUser.point = updatedUser.point;
+        existingUser.type = updatedUser.type;
 
         await existingUser.save();
 

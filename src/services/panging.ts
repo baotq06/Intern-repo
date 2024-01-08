@@ -1,7 +1,7 @@
 import { ExpressHandler, nextpayResponse, nextpayError } from '../interfaces/expressHandler';
 import Logger from '../libs/logger';
 import langs from '../constants/langs';
-import TestModel from '../models/test.model';
+import AdminModel from '../models/test.model';
 
 const logger = Logger.create('pagination_api.ts');
 
@@ -14,57 +14,39 @@ const paginateAPI: ExpressHandler[] = [{
     method: 'POST',
     action: async (req, res) => {
         try {
-            const { page, pageSize = 1, filters } = req.body;
+            const { page, pageSize, filters } = req.body;
             const offset = (page - 1) * pageSize;
 
-            // filters: dùng để tìm theo username or age or address ........
             const query: Record<string, any> = {};
             if (filters) {
                 if (filters.username) {
-                    query.username = { $regex: new RegExp(filters.username, 'i') };
+                    query.username = filters.username;
                 }
                 if (filters.name) {
-                    query.name = { $regex: new RegExp(filters.name, 'i') };
+                    query.name = filters.name;
                 }
                 if (filters.age) {
                     query.age = filters.age;
                 }
                 if (filters.address) {
-                    query.address = { $regex: new RegExp(filters.address, 'i') };
+                    query.address = filters.address;
                 }
             }
 
-            const filteredDocuments = await TestModel.find(query).skip(offset).limit(parseInt(pageSize)).lean();
-
-            const mappedFilters = filteredDocuments.map((filter) => ({
-                _id: filter._id.toString(),
-                name: filter.name,
-                age: filter.age,
-                address: filter.address,
-                team: filter.team,
-                role: filter.role,
-                username: filter.username,
-                password: filter.password,
-            }));
-
-            // const users = await TestModel.find()
-            //     .skip(offset)
-            //     .limit(parseInt(pageSize))
-            //     .lean();
+            const filteredDocument = await AdminModel.find(filters).skip(offset).limit(pageSize).lean();
 
             // count record
-            const totalUser = await TestModel.countDocuments();
+            const totalUser = await AdminModel.countDocuments(filters);
 
             // count page
             const totalPage = Math.ceil(totalUser / pageSize);
 
             const paginationInfo = {
-                currentPage: parseInt(page),
-                pageSize: parseInt(page),
-                totalUser,
-                totalPage,
-                // users,
-                filters: mappedFilters
+                currentPage: page,
+                pageSize: page,
+                totalPage: totalPage,
+                totalUser: totalUser,
+                filters: filteredDocument
             }
 
             return nextpayResponse(res, 'Pagination successful', 'PAGINATION_SUCCESS', paginationInfo);

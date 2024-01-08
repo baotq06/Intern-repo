@@ -1,4 +1,29 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+
+interface InventoryItem {
+  itemId: mongoose.Types.ObjectId;
+  itemName: string;
+  points: number;
+  timestamp: Date;
+}
+
+const inventoryItemSchema = new Schema<InventoryItem>(
+  {
+    itemName: {
+      type: String,
+      required: true,
+    },
+    points: {
+      type: Number,
+      required: true,
+    },
+    timestamp: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+  },
+);
 
 interface User extends Document {
   name: string;
@@ -8,6 +33,9 @@ interface User extends Document {
   role: string;
   username: string;
   password: string;
+  point: number;
+  type: 'topup' | 'exchange';
+  inventory: InventoryItem[];
 }
 
 const userSchema = new mongoose.Schema(
@@ -39,7 +67,19 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       require: true,
-    }
+    },
+    point: {
+      type: Number,
+      default: 0
+    },
+    type: {
+      type: String,
+      enum: ['topup', 'exchange']
+    },
+    inventory: {
+      type: [inventoryItemSchema],
+      default: [],
+    },
   },
   { collection: 'admin' }
 );

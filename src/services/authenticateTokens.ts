@@ -6,6 +6,7 @@ import UserModel from '../models/test.model';
 
 const logger = Logger.create('loggerCfg.ts');
 const apis: ExpressHandler[] = [
+    //
     {
         path: '/user-profile',
         method: 'GET',
@@ -85,7 +86,7 @@ const apis: ExpressHandler[] = [
     },
     // Truyền token mà khi login sinh ra
     // B1: Nếu là admin thì in ra thông tin của tất cả mọi người (all)
-    // B2: Nếu là user thì chỉ in ra thông tin của những người liên quan với user đó, vd: cùng team.......
+    // B2: Nếu là user thì chỉ in ra thông tin của những người liên quan với user đó, vd: cùng team, cùng công việc ...
     {
         path: '/list-users',
         method: 'GET',
@@ -101,13 +102,10 @@ const apis: ExpressHandler[] = [
 
                 const isAdmin = user.role.trim().toLowerCase() === 'admin';
                 if (isAdmin) {
-                    // logger.info()
                     const allUsers = await UserModel.find().lean();
 
                     return nextpayResponse(res, 'User list retrieved successfully', 'LIST_SUCCESS', allUsers);
                 } else {
-                    console.log('1');
-
                     if (!user) {
                         return nextpayError(res, 'User not found', langs.INTERNAL_SERVER_ERROR);
                     }

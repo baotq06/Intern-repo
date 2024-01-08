@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-// import TokenModel from '../models/token.model';
-// import TestModel from '../models/test.model';
 import TokenModel from '../models/token.model';
 
 export async function authenticateToken(req: Request, res: Response, next: NextFunction) {
