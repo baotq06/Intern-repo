@@ -45,7 +45,6 @@ const apis: ExpressHandler[] = [
 
                 // Trừ điểm của người dùng
                 loggedInUser.point -= point;
-                await loggedInUser.save();
 
                 // Thêm vật phẩm vào kho của người dùng (cần có model Người dùng có trường tồn kho)
                 loggedInUser.inventory.push({
@@ -54,6 +53,12 @@ const apis: ExpressHandler[] = [
                     points: marketItem.point,
                     timestamp: new Date(),
                 });
+
+                loggedInUser.transactions.push({
+                    type: 'exchange',
+                    amount: -point,
+                    timestamp: new Date(),
+                })
 
                 await loggedInUser.save();
 

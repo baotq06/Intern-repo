@@ -7,6 +7,12 @@ interface InventoryItem {
   timestamp: Date;
 }
 
+interface Transaction {
+  type: 'topup' | 'exchange';
+  amount: number;
+  timestamp: Date;
+}
+
 const inventoryItemSchema = new Schema<InventoryItem>(
   {
     itemName: {
@@ -25,6 +31,24 @@ const inventoryItemSchema = new Schema<InventoryItem>(
   },
 );
 
+const transactionSchema = new Schema<Transaction>(
+  {
+    type: {
+      type: String,
+      enum: ['topup', 'exchange'],
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+);
+
 interface User extends Document {
   name: string;
   age: number;
@@ -36,6 +60,9 @@ interface User extends Document {
   point: number;
   type: 'topup' | 'exchange';
   inventory: InventoryItem[];
+  transactions: Transaction[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema = new mongoose.Schema(
@@ -78,10 +105,17 @@ const userSchema = new mongoose.Schema(
     },
     inventory: {
       type: [inventoryItemSchema],
-      default: [],
+      default: [] as Transaction[],
+    },
+    transactions: {
+      type: [transactionSchema],
+      default: [] as Transaction[],
     },
   },
-  { collection: 'admin' }
+  {
+    collection: 'admin',
+    timestamps: true,
+  }
 );
 
 const UserModel = mongoose.model<User>('admin', userSchema);

@@ -54,7 +54,7 @@ const apis: ExpressHandler[] = [
     {
         path: '/topup',
         method: 'PUT',
-        preValidatorMiddlewares: [authenticateToken],
+        preValidatorMiddlewares: [authenticateToken, checkAdmin],
         action: async (req, res) => {
             try {
                 const { userId, updatedData } = req.body;
@@ -64,13 +64,25 @@ const apis: ExpressHandler[] = [
                     return nextpayError(res, 'User to update not found', langs.INTERNAL_SERVER_ERROR);
                 }
 
-                userToUpdate.point += updatedData.point || userToUpdate.point;
+                const { point } = updatedData;
+                const pointToAdd = +point || 0;
+                if (isNaN(pointToAdd)) {
+                    return nextpayError(res, 'Invalid point value provided', langs.BAD_REQUEST);
+                }
+
+                userToUpdate.transactions.push({
+                    type: 'topup',
+                    amount: pointToAdd,
+                    timestamp: new Date(),
+                });
+
+                userToUpdate.point += pointToAdd;
 
                 await userToUpdate.save();
 
                 logger.info(req.originalUrl, req.method, req.params, req.query, req.body);
 
-                return nextpayResponse(res, 'User information updated successfully', 'UPDATE_SUCCESS', null);
+                return nextpayResponse(res, 'User information updated successfully', 'UPDATE_SUCCESS', userToUpdate);
 
 
             } catch (err: any) {

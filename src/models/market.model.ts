@@ -20,7 +20,7 @@ const marketSchema = new mongoose.Schema({
     itemName: {
         type: String,
         required: true,
-    }
+    },
 },
     { collection: 'Market' }
 );

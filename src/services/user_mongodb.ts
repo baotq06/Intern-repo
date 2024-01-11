@@ -27,8 +27,9 @@ const apis: ExpressHandler[] = [
           username: user.username,
           password: user.password,
           point: user.point,
-          type: user.type,
+          // type: user.type,
           inventory: user.inventory,
+          transactions: user.transactions,
         }));
 
         return nextpayResponse(res, 'Users retrieved successfully', 'USERS_RETRIEVED', formattedUsers);

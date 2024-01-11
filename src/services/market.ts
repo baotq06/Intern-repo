@@ -1,5 +1,4 @@
 import MarketModel from '../models/market.model';
-import TestModel from '../models/test.model';
 import { ExpressHandler, nextpayResponse, nextpayError } from '../interfaces/expressHandler';
 import Logger from '../libs/logger';
 import langs from '../constants/langs';
@@ -15,7 +14,6 @@ const apis: ExpressHandler[] = [
     {
         path: '/market',
         method: 'GET',
-        preValidatorMiddlewares: [authenticateToken, checkAdmin],
         action: async (req, res) => {
             try {
                 logger.debug(req.originalUrl, req.method, req.params, req.query, req.body);
@@ -65,17 +63,10 @@ const apis: ExpressHandler[] = [
     {
         path: '/market',
         method: 'PUT',
-        preValidatorMiddlewares: [authenticateToken],
+        preValidatorMiddlewares: [authenticateToken, checkAdmin],
         action: async (req, res) => {
             try {
                 logger.debug(req.originalUrl, req.method, req.params, req.query, req.body);
-
-                const loggedInUserId = req.body.user?.userId;
-                const loggedInUser = await TestModel.findById(loggedInUserId);
-
-                if (!loggedInUser) {
-                    return nextpayError(res, 'Logged-in user not found', langs.INTERNAL_SERVER_ERROR);
-                }
 
                 const { userId, updatedData } = req.body;
                 const marketItem = await MarketModel.findById(userId);
@@ -84,20 +75,15 @@ const apis: ExpressHandler[] = [
                     return nextpayError(res, 'Market item not found', langs.INTERNAL_SERVER_ERROR);
                 }
 
-                const isAdmin = loggedInUser.role === 'admin';
+                marketItem.itemName = updatedData.name || marketItem.itemName;
+                marketItem.point = updatedData.point || marketItem.point;
 
-                if (isAdmin) {
-                    marketItem.itemName = updatedData.name || marketItem.itemName;
-                    marketItem.point = updatedData.point || marketItem.point;
+                await marketItem.save();
 
-                    await marketItem.save();
+                logger.info(req.originalUrl, req.method, req.params, req.query, req.body);
 
-                    logger.info(req.originalUrl, req.method, req.params, req.query, req.body);
+                return nextpayResponse(res, 'Market item updated successfully', 'UPDATE_SUCCESS', null);
 
-                    return nextpayResponse(res, 'Market item updated successfully', 'UPDATE_SUCCESS', null);
-                } else {
-                    return nextpayError(res, 'Unauthorized: Insufficient permissions to update market item', langs.UNAUTHORIZED);
-                }
             } catch (err: any) {
                 logger.error(req.originalUrl, req.method, 'error:', err);
 
@@ -109,6 +95,7 @@ const apis: ExpressHandler[] = [
     {
         path: '/market/:id',
         method: 'DELETE',
+        preValidatorMiddlewares: [authenticateToken, checkAdmin],
         action: async (req, res) => {
             try {
                 logger.debug(req.originalUrl, req.method, req.params, req.query, req.body);

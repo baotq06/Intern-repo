@@ -12,8 +12,6 @@ export async function checkAdmin(req: Request, res: Response, next: NextFunction
                 message: 'Forbidden: Insufficient permissions',
             });
         }
-
-        // If the user is an admin, proceed to the next middleware or route handler
         next();
     } catch (error) {
         console.error('Error checking admin:', error);
